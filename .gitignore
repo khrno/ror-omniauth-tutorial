@@ -49,3 +49,5 @@ build/
 # Ignore all logfiles and tempfiles.
 /log/*.log
 /tmp
+.idea/vcs.xml
+.idea/workspace.xml
