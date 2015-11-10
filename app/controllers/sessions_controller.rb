@@ -20,7 +20,10 @@ class SessionsController < ApplicationController
     # render :text => "You can login using #{auth_hash["provider"].capitalize} too!"
 
     if auth_hash["provider"] == "twitter"
-      screen_names = []
+
+      logger.info "Credentials - token: " + auth_hash["credentials"]["token"]
+      logger.info "Credentials - Secret: " + auth_hash["credentials"]["secret"]
+
       next_cursor = -1
 
       while next_cursor != 0
