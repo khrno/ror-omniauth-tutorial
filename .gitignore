@@ -51,3 +51,4 @@ build/
 /tmp
 .idea/vcs.xml
 .idea/workspace.xml
+.idea/*
