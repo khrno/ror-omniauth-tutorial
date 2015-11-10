@@ -37,6 +37,12 @@ gem 'jquery-rails'
 # To use debugger
 # gem 'debugger'
 
+gem 'test-unit', '~> 3.0'
+
 gem 'omniauth'
 gem 'omniauth-facebook'
 gem 'omniauth-twitter'
+
+gem 'twitter'
+
+gem 'awesome_print'

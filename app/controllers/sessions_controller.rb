@@ -1,3 +1,4 @@
+# require 'twitter_client'
 class SessionsController < ApplicationController
   def new
   end
@@ -8,28 +9,46 @@ class SessionsController < ApplicationController
     if session[:user_id]
       User.find(session[:user_id]).add_provider(auth_hash)
 
-      render :text => "You can login using #{auth_hash["provider"].capitalize} too!"
+
     else
       auth = Authorization.find_or_create(auth_hash)
 
       session[:user_id] = auth.user.id
 
-      render :text => "Welcome #{auth.user.name}!"
+
 
     end
+    # render :text => "You can login using #{auth_hash["provider"].capitalize} too!"
 
+    if auth_hash["provider"] == "twitter"
+      logger.info "Token: " + auth_hash["credentials"]["token"]
+      logger.info "Secret: " + auth_hash["credentials"]["secret"]
+      config = {
+          consumer_key:    auth_hash["credentials"]["token"],
+          consumer_secret: auth_hash["credentials"]["secret"],
+      }
 
-    # @authorization = Authorization.find_by_provider_and_uid(auth_hash["provider"], auth_hash["uid"])
-    #
-    # if @authorization
-    #   render :text => "Welcome back #{@authorization.user.name}! You have already signed up."
-    # else
-    #   user = User.new :name => auth_hash["info"]["name"], :email => auth_hash["info"]["email"]
-    #   user.authorizations.build :provider => auth_hash["provider"], :uid => auth_hash["uid"]
-    #   user.save
-    #
-    #   render :text => "Hi #{user.name}! You've signed up"
-    # end
+      @client = ::Twitter::REST::Client.new do |config|
+        config.consumer_key = "KXt2vqosFVQZdvXievvcXXgO8"
+        config.consumer_secret = "nRX6rDSoLbHaDiuBRfGI21C1Qqn6loilytbwa66GXekL89HDKI"
+        config.access_token = "31307687-6F47KlrUgbZwyCL8jfK2nJkqx3oYbyjIEVD8rGFVl"
+        config.access_token_secret = "OyLlqR7OYLlLk1MUqcQgkqd5QrGAnZcXhjTQJRxJZDrGY"
+      end
+
+      screen_names = []
+      next_cursor = -1
+      while next_cursor != 0
+        cursor = @client.followers(:cursor => next_cursor)
+        cursor.each do |follower|
+          ap follower.screen_name
+          screen_names.append(follower.screen_name)
+        end
+        next_cursor = cursor.next_cursor
+        sleep(2000)
+      end
+
+      render :text => "# Followers indexed: #{screen_names.count}"
+    end
   end
 
   def destroy
