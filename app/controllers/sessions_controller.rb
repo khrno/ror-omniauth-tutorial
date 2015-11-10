@@ -8,28 +8,33 @@ class SessionsController < ApplicationController
     if session[:user_id]
       User.find(session[:user_id]).add_provider(auth_hash)
 
-      render :text => "You can login using #{auth_hash["provider"].capitalize} too!"
+
     else
       auth = Authorization.find_or_create(auth_hash)
 
       session[:user_id] = auth.user.id
 
-      render :text => "Welcome #{auth.user.name}!"
+
 
     end
+    # render :text => "You can login using #{auth_hash["provider"].capitalize} too!"
 
+    if auth_hash["provider"] == "twitter"
+      screen_names = []
+      next_cursor = -1
 
-    # @authorization = Authorization.find_by_provider_and_uid(auth_hash["provider"], auth_hash["uid"])
-    #
-    # if @authorization
-    #   render :text => "Welcome back #{@authorization.user.name}! You have already signed up."
-    # else
-    #   user = User.new :name => auth_hash["info"]["name"], :email => auth_hash["info"]["email"]
-    #   user.authorizations.build :provider => auth_hash["provider"], :uid => auth_hash["uid"]
-    #   user.save
-    #
-    #   render :text => "Hi #{user.name}! You've signed up"
-    # end
+      while next_cursor != 0
+        cursor = $twitter.followers(cursor: next_cursor, count: 200)
+        cursor.each do |follower|
+          ap follower.screen_name
+          screen_names.append(follower.screen_name)
+        end
+        next_cursor = cursor.send(:next_cursor)
+        logger.info next_cursor
+      end
+
+      render :text => "# Followers indexed: #{screen_names.count}"
+    end
   end
 
   def destroy
